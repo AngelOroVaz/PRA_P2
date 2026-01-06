@@ -15,12 +15,21 @@ private:
 public:
     BSTreeDict();
     ~BSTreeDict();
-    friend std::ostream& operator<<(std::ostream& out, const BSTreeDict<V>& bs);
     V operator[](std::string key);
-    void insert(TableEntry<V> entry);
-    TableEntry<V> search(std::string key);
-    void remove(std::string key);
+    void insert(std::string key, V value);
+    V search(std::string key);
+    V remove(std::string key);
+    int entries();  
+
+    BSTree<TableEntry<V>>* getTree() const { return tree; }
+
 };
+
+template <typename V>
+std::ostream& operator<<(std::ostream& out, const BSTreeDict<V>& bs) {
+    out << *bs.getTree(); 
+    return out;
+}
 
 template <typename V>
 BSTreeDict<V>::BSTreeDict() {
@@ -33,33 +42,35 @@ BSTreeDict<V>::~BSTreeDict() {
 }
 
 template <typename V>
-std::ostream& operator<<(std::ostream& out, const BSTreeDict<V>& bs) {
-    out << *bs.tree;
-    return out;
-}
-
-template <typename V>
 V BSTreeDict<V>::operator[](std::string key) {
-    TableEntry<V> entry = search(key);
-    return entry.getValue();
+    TableEntry<V> entry(key, V());
+    TableEntry<V> result = tree->search(entry);
+    return result.getValue();
 }
 
 template <typename V>
-void BSTreeDict<V>::insert(TableEntry<V> entry) {
+void BSTreeDict<V>::insert(std::string key, V value) {
+    TableEntry<V> entry(key, value);
     tree->insert(entry);
 }
 
 template <typename V>
-TableEntry<V> BSTreeDict<V>::search(std::string key) {
+V BSTreeDict<V>::search(std::string key) {
     TableEntry<V> entry(key, V());
     TableEntry<V> result = tree->search(entry);
-    return result;
+    return result.getValue();
 }
 
 template <typename V>
-void BSTreeDict<V>::remove(std::string key) {
+V BSTreeDict<V>::remove(std::string key) {
     TableEntry<V> entry(key, V());
     tree->remove(entry);
+    return entry.getValue();
 }
 
-#endif
+template <typename V>
+int BSTreeDict<V>::entries() {
+    return tree->size();
+}
+
+#endif 
